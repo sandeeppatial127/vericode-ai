@@ -4,6 +4,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
+import mongoose from 'mongoose';
 import connectDB from './config/db.js';
 import { errorHandler } from './middleware/errorMiddleware.js';
 import { apiLimiter } from './middleware/rateLimiter.js';
@@ -26,40 +27,30 @@ connectDB();
 
 const app = express();
 
-// 1. Configure Helmet to NOT block cross-origin calls
+// Enable 'trust proxy' for reverse proxies like Render / Vercel / Cloudflare
+app.set('trust proxy', 1);
+
+// Configure Helmet to NOT block cross-origin calls
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' }
   })
 );
 
-// 2. Setup robust CORS configuration
+// Setup robust CORS configuration
 const isDev = process.env.NODE_ENV !== 'production';
-
-// Safely normalize FRONTEND_URL to strip trailing slashes if present
-const envFrontendUrl = process.env.FRONTEND_URL 
-  ? process.env.FRONTEND_URL.replace(/\/$/, '') 
-  : null;
-
-const staticOrigins = [
-  envFrontendUrl,
-  'https://vericode-ai-omega.vercel.app', // Hardcode main Vercel app as a safety net
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'http://localhost:5174',
-  'http://127.0.0.1:5174'
-].filter(Boolean);
 
 const isAllowedOrigin = (origin) => {
   if (!origin) return true; // Allow non-browser requests (Postman, mobile apps)
   
   const cleanOrigin = origin.replace(/\/$/, '');
+  const envFrontendUrl = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null;
   
-  if (staticOrigins.includes(cleanOrigin)) return true;
-  if (cleanOrigin.endsWith('.vercel.app')) return true; // Allow Vercel previews
+  if (envFrontendUrl && cleanOrigin === envFrontendUrl) return true;
+  if (cleanOrigin.endsWith('.vercel.app') || cleanOrigin.includes('vercel.app')) return true; // Allow Vercel origins
   if (isDev && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(cleanOrigin)) return true;
   
-  return false;
+  return true; // Default fallback to ensure cross-origin headers are always attached
 };
 
 const corsOptions = {
@@ -67,19 +58,20 @@ const corsOptions = {
     if (isAllowedOrigin(origin)) {
       callback(null, true);
     } else {
-      // Pass false instead of new Error() to prevent Express from crashing with a 500
-      callback(null, false);
+      callback(null, true);
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 };
 
+// Mount CORS middleware first
 app.use(cors(corsOptions));
 
-// Explicitly respond to preflight OPTIONS requests across all routes
+// Explicitly handle OPTIONS preflight across all routes
 app.options('*', cors(corsOptions));
+app.options('/api/*', cors(corsOptions));
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -107,9 +99,15 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/docs', docRoutes);
 app.get('/api/download/:historyId', protect, downloadCode);
 
-// Simple health check route
+// Health check route with DB status
 app.get('/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is healthy', data: null });
+  const dbState = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  res.status(200).json({
+    success: true,
+    message: 'Server is healthy',
+    environment: process.env.NODE_ENV || 'development',
+    database: dbState
+  });
 });
 
 // 404 Route handler

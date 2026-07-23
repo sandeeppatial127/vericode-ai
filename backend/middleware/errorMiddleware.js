@@ -34,9 +34,17 @@ export const errorHandler = (err, req, res, next) => {
   const statusCode = error.statusCode || 500;
   const responseMessage = error.message || 'Server Error';
 
+  // Ensure CORS headers are attached on error responses
+  const origin = req.headers.origin;
+  if (origin) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.status(statusCode).json({
     success: false,
     message: responseMessage,
     data: null
   });
 };
+
