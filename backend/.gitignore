@@ -1,0 +1,12 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated files
+node_modules/
+logs/*
+!logs/.gitkeep
+uploads/*
+!uploads/.gitkeep
+npm-debug.log*

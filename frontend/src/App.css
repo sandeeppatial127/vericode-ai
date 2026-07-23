@@ -1,0 +1,441 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* Fixed to apply universally */
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text-white);
+  overflow-x: hidden;
+}
+
+:root {
+  --bg: #0F1115;
+  --secondary-bg: #13131B;
+  --tertiary-bg: #16181E;
+  --button-black-bg: #1F1F27;
+  --blue: #6366F1;
+  --black-bg-tertiary: #34343D;
+  --light-red: #FFB4AB;
+  --warning: #FFB783;
+  --tw-bg-opacity: 1;
+  --text-white: #E4E1ED;
+  --text-gray: #B3C0D7;
+  --border-color: rgba(144, 143, 160, 0.1);
+  --black-hover: rgb(41 41 50 / var(--tw-bg-opacity, 1));
+}
+
+/* --- Navbar Responsiveness --- */
+.navbar {
+  display: flex;
+  align-items: center;
+  height: 4rem; /* Matched React component height layout requirement */
+  background-color: var(--secondary-bg);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0 20px;
+}
+
+.navbar .links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-left: 20px;
+  font-size: 14px;
+  color: var(--text-gray);
+  font-weight: 500;
+}
+
+.right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* --- Global Actions --- */
+.trans {
+  padding: 8px 14px;
+  background-color: transparent;
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.trans:hover {
+  background-color: var(--black-hover);
+}
+
+.blue-btn {
+  padding: 8px 14px;
+  background-color: var(--blue);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+.blue-btn:hover {
+  opacity: 0.9;
+}
+
+.icon {
+  font-size: 20px;
+  color: var(--text-gray);
+  cursor: pointer;
+}
+
+.icon:hover {
+  color: var(--text-white);
+}
+
+/* --- Container App Layout Layout --- */
+.container {
+  height: calc(100vh - 4rem);
+  display: flex;
+  width: 100%;
+}
+
+.left, .right {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.language-selector {
+  padding: 6px 12px;
+  background-color: var(--black-hover);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  color: var(--text-white);
+  transition: all 0.3s ease-in-out;
+}
+
+.language-selector option {
+  background-color: #11111A;
+  color: var(--text-white);
+}
+
+.code-editor {
+  flex-grow: 1;
+  min-height: 350px;
+}
+
+.lines-content {
+  width: 100%;
+}
+
+/* --- Component Diagnostics Cards --- */
+.progressbar {
+  border: 1px solid var(--border-color);
+}
+
+.summary {
+  border: 1px solid rgba(99, 102, 241, 0.1);
+}
+
+.criticalBox {
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease-in-out;
+}
+
+.criticalBox:hover {
+  border-color: #6366F1;
+}
+
+.warningCom {
+  border: 1px solid var(--border-color);
+}
+
+.security_audit_comp {
+  border: 1px solid var(--border-color);
+}
+
+.protip {
+  border-left: 5px solid var(--blue);
+  border-radius: 10px;
+}
+
+.explanation-panel {
+  color: #d9deed;
+}
+
+.explanation-heading {
+  padding: 6px 4px 22px;
+  border-bottom: 1px solid rgba(144, 143, 160, 0.14);
+  margin-bottom: 22px;
+}
+
+.explanation-kicker {
+  color: #8f9cff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.explanation-heading h2 {
+  margin: 8px 0 4px;
+  color: #f3f5ff;
+  font-size: 24px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.explanation-heading p {
+  color: #8f99b2;
+  font-size: 13px;
+}
+
+.explanation-preview {
+  max-width: 860px;
+  color: #d9deed !important;
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+
+.explanation-preview h1,
+.explanation-preview h2,
+.explanation-preview h3,
+.explanation-preview h4 {
+  color: #f3f5ff !important;
+  line-height: 1.3 !important;
+  margin-top: 24px !important;
+  margin-bottom: 10px !important;
+}
+
+.explanation-preview h1 { font-size: 26px !important; }
+.explanation-preview h2 { font-size: 20px !important; }
+.explanation-preview h3 { font-size: 17px !important; }
+
+.explanation-preview p,
+.explanation-preview li {
+  color: #b9c2d8 !important;
+}
+
+.explanation-preview p {
+  max-width: 78ch;
+  margin-bottom: 12px !important;
+}
+
+.explanation-preview ul,
+.explanation-preview ol {
+  margin: 8px 0 16px !important;
+  padding-left: 24px !important;
+}
+
+.explanation-preview li {
+  margin: 6px 0 !important;
+  padding-left: 4px;
+}
+
+.explanation-preview table {
+  display: table;
+  width: 100%;
+  margin: 14px 0 22px;
+  border-collapse: collapse;
+  font-size: 13px;
+  table-layout: fixed;
+}
+
+.explanation-preview th,
+.explanation-preview td {
+  padding: 10px 12px !important;
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid #293149 !important;
+  color: #b9c2d8 !important;
+  word-break: break-word;
+}
+
+.explanation-preview th {
+  color: #eef1ff !important;
+  background: #1a2031 !important;
+  font-weight: 700;
+}
+
+.explanation-preview tr:nth-child(even) td {
+  background: rgba(22, 27, 43, 0.55) !important;
+}
+
+.explanation-preview strong {
+  color: #eef1ff !important;
+}
+
+.explanation-preview code {
+  color: #9fe8ca !important;
+  background: #171b2a !important;
+  border-radius: 4px;
+  padding: 2px 5px;
+}
+
+.explanation-preview pre {
+  background: #111522 !important;
+  border: 1px solid #252c40;
+  border-radius: 8px;
+  padding: 14px !important;
+  overflow-x: auto;
+}
+
+.explanation-preview pre code {
+  padding: 0;
+  color: #d9deed !important;
+  background: transparent !important;
+}
+
+.explanation-preview blockquote {
+  color: #aeb8cf !important;
+  border-left-color: #6366f1 !important;
+}
+
+.gridBox {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+/* ==========================================
+   MEDIA QUERIES FOR RESPONSIVENESS
+   ========================================== */
+
+/* Tablet & Mobile Screens Viewports */
+@media screen and (max-width: 992px) {
+  .navbar {
+    padding: 0 15px;
+    height: auto;
+    min-height: 4rem;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .navbar .links {
+    display: flex;
+    flex: 1 1 100%;
+    order: 3;
+    margin: 0;
+    padding: 0 0 10px;
+    gap: 14px;
+    justify-content: space-between;
+    font-size: 13px;
+  }
+
+  .navbar .right {
+    margin-left: auto;
+    gap: 8px;
+  }
+
+  .navbar .right .trans,
+  .navbar .right .blue-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  .container {
+    height: auto;
+    flex-direction: column; /* Stack editor above panel container */
+    overflow-y: auto;
+  }
+
+  /* Force side elements to consume entire width */
+  .container .left, 
+  .container .right {
+    width: 100% !important; 
+    height: auto !important;
+    border-right: none;
+  }
+
+  .container .left {
+    border-left: 1px solid var(--border-color);
+  }
+
+  .code-editor {
+    flex: 0 0 58vh;
+    height: 58vh;
+    min-height: 420px;
+    width: 100%;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .gridBox {
+    grid-template-columns: 1fr; /* Stack progress bars on smaller surfaces */
+    gap: 10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .navbar {
+    align-items: center;
+    padding: 10px;
+  }
+
+  .navbar .logo h3 {
+    font-size: 14px;
+  }
+
+  .navbar .right {
+    flex: 1 1 auto;
+    justify-content: flex-end;
+  }
+
+  .navbar .right .trans {
+    display: none;
+  }
+
+  .navbar .right .blue-btn {
+    padding: 7px 8px;
+  }
+
+  .navbar .links {
+    gap: 8px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .navbar .links a {
+    flex: 0 0 auto;
+  }
+
+  .left-header {
+    height: auto;
+    min-height: 4rem;
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .left-header .blue-btn {
+    width: auto;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .language-selector {
+    max-width: 132px;
+  }
+  
+  .buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .blue-btn, .trans {
+    width: 100%;
+    text-align: center;
+  }
+
+  .code-editor {
+    flex-basis: 64vh;
+    height: 64vh;
+    min-height: 440px;
+  }
+
+  .right > div {
+    padding: 14px;
+  }
+}
