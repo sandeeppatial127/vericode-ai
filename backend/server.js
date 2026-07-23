@@ -26,13 +26,24 @@ connectDB();
 
 const app = express();
 
-// Security HTTP Headers
-app.use(helmet());
+// 1. Configure Helmet to NOT block cross-origin calls
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' }
+  })
+);
 
-// Enable CORS (allow localhost/127.0.0.1 on any port in development)
+// 2. Setup robust CORS configuration
 const isDev = process.env.NODE_ENV !== 'production';
+
+// Safely normalize FRONTEND_URL to strip trailing slashes if present
+const envFrontendUrl = process.env.FRONTEND_URL 
+  ? process.env.FRONTEND_URL.replace(/\/$/, '') 
+  : null;
+
 const staticOrigins = [
-  process.env.FRONTEND_URL,
+  envFrontendUrl,
+  'https://vericode-ai-omega.vercel.app', // Hardcode main Vercel app as a safety net
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'http://localhost:5174',
@@ -40,26 +51,35 @@ const staticOrigins = [
 ].filter(Boolean);
 
 const isAllowedOrigin = (origin) => {
-  if (!origin) return true;
-  if (staticOrigins.includes(origin)) return true;
-  if (isDev && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) return true;
+  if (!origin) return true; // Allow non-browser requests (Postman, mobile apps)
+  
+  const cleanOrigin = origin.replace(/\/$/, '');
+  
+  if (staticOrigins.includes(cleanOrigin)) return true;
+  if (cleanOrigin.endsWith('.vercel.app')) return true; // Allow Vercel previews
+  if (isDev && /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(cleanOrigin)) return true;
+  
   return false;
 };
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (isAllowedOrigin(origin)) {
-        callback(null, origin || staticOrigins[0]);
-      } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
-      }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
-  })
-);
+const corsOptions = {
+  origin(origin, callback) {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+    } else {
+      // Pass false instead of new Error() to prevent Express from crashing with a 500
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+};
+
+app.use(cors(corsOptions));
+
+// Explicitly respond to preflight OPTIONS requests across all routes
+app.options('*', cors(corsOptions));
 
 // Logging middleware
 if (process.env.NODE_ENV === 'development') {
@@ -69,7 +89,7 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 // Body parsers
-app.use(express.json({ limit: '10mb' })); // Support larger code snippets
+app.use(express.json({ limit: '10mb' })); 
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Cookie parser
@@ -79,13 +99,13 @@ app.use(cookieParser());
 app.use('/api', apiLimiter);
 
 // Mount API Routes
-app.use('/api/auth', authRoutes);       // /api/auth/login, /api/auth/register, /api/auth/me
-app.use('/api', aiRoutes);             // /api/analyze, /api/explain, /api/fix
-app.use('/api/history', historyRoutes); // /api/history, /api/history/:id
-app.use('/api/report', reportRoutes);   // /api/report, /api/report/:id
-app.use('/api/dashboard', dashboardRoutes); // /api/dashboard
-app.use('/api/docs', docRoutes);       // /api/docs
-app.get('/api/download/:historyId', protect, downloadCode); // /api/download/:historyId
+app.use('/api/auth', authRoutes);
+app.use('/api', aiRoutes);
+app.use('/api/history', historyRoutes);
+app.use('/api/report', reportRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/docs', docRoutes);
+app.get('/api/download/:historyId', protect, downloadCode);
 
 // Simple health check route
 app.get('/health', (req, res) => {
@@ -107,12 +127,11 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {
   console.error(`Unhandled Rejection Error: ${err.message}`);
-  // Close server & exit process
   server.close(() => process.exit(1));
 });
